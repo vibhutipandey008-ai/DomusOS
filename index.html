@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1020">
+<title>DomusOS | Complete Smart Home</title>
+<style>
+:root{
+ --bg:#0b1020;--sidebar:#0a1020;--panel:#141e33;--panel2:#1a2741;--panel3:#10192c;
+ --text:#f3f6ff;--muted:#91a0bb;--subtle:#65738e;--line:rgba(255,255,255,.085);
+ --accent:#9aaaff;--mint:#68dfbd;--amber:#ffc66e;--red:#ff7d88;--blue:#7bc6ff;
+ --shadow:0 18px 50px rgba(0,0,0,.22);--radius:19px
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 80% -5%,#202e52 0,transparent 34%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{color:inherit}
+.app{min-height:100vh;display:grid;grid-template-columns:248px minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:100vh;overflow:auto;padding:25px 17px 18px;background:rgba(8,13,27,.84);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:27px;z-index:5;backdrop-filter:blur(18px)}
+.brand{display:flex;gap:12px;align-items:center;padding:0 10px}.brandmark{width:42px;height:42px;border-radius:15px;background:linear-gradient(135deg,#a8b3ff,#69e3c1);display:grid;place-items:center;color:#111a2d;font-size:24px;font-weight:900;box-shadow:0 7px 22px #8b9cff33}
+.brand strong{font-size:18px;letter-spacing:.2px}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.7px;text-transform:uppercase}
+.nav-label{font-size:10px;color:var(--subtle);letter-spacing:1.7px;font-weight:800;padding:0 12px;margin-bottom:8px}
+.nav{display:grid;gap:4px}.nav button{width:100%;border:1px solid transparent;background:transparent;color:#aab6cc;text-align:left;padding:12px;border-radius:12px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:.18s}
+.nav button:hover{background:#1c2943;color:#fff}.nav button.active{background:linear-gradient(100deg,#283856,#202d49);border-color:#ffffff12;color:#fff}
+.nav .ico{width:20px;text-align:center;font-size:17px}.side-bottom{margin-top:auto;background:linear-gradient(145deg,#202e4b,#18243b);padding:15px;border:1px solid var(--line);border-radius:16px}
+.side-bottom small{color:var(--muted)}.side-bottom strong{display:block;margin:5px 0 10px}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px}
+.main{width:100%;max-width:1580px;margin:0 auto;padding:29px clamp(17px,3.7vw,48px) 24px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:25px}
+.eyebrow{color:var(--mint);font-size:10px;font-weight:850;letter-spacing:1.8px;text-transform:uppercase}
+h1{font-size:clamp(27px,3vw,36px);letter-spacing:-1.1px;line-height:1.15;margin:6px 0 5px}
+.topbar p{color:var(--muted);margin:0}.profile{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);padding:7px 13px 7px 7px;border-radius:30px;white-space:nowrap}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#465b8c,#2d4167);display:grid;place-items:center;font-weight:800}
+.page{display:none;animation:fade .2s ease}.page.active{display:block}@keyframes fade{from{opacity:.3;transform:translateY(4px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.card{background:linear-gradient(145deg,rgba(25,37,62,.97),rgba(17,26,45,.97));border:1px solid var(--line);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);min-width:0}
+.card-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.card-title h3{font-size:16px;margin:0}.card-title .hint{font-size:11px;color:var(--muted)}
+.welcome{grid-column:span 8;min-height:178px;display:flex;align-items:center;justify-content:space-between;gap:20px;overflow:hidden;position:relative}
+.welcome:after{content:"⌂";position:absolute;right:25px;bottom:-65px;font-size:235px;color:rgba(139,156,255,.075);pointer-events:none}
+.welcome h2{font-size:25px;letter-spacing:-.5px;margin:7px 0}.welcome p{color:var(--muted);max-width:450px;margin:0}
+.welcome-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px;position:relative;z-index:1}
+.weather{grid-column:span 4;display:flex;flex-direction:column;justify-content:space-between;min-height:178px}
+.weather-top{display:flex;justify-content:space-between;align-items:center}.weather-temp{font-size:40px;font-weight:780;letter-spacing:-2px}.weather small{color:var(--muted)}
+.weather-bottom{display:flex;justify-content:space-between;gap:10px}.weather-bottom strong{display:block}.weather-bottom span{font-size:11px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:7px;border-radius:30px;padding:6px 10px;background:rgba(103,224,189,.1);color:var(--mint);font-size:10px;font-weight:800;white-space:nowrap}
+.pill.warn{background:#ffc66e18;color:var(--amber)}.pill.danger{background:#ff7d8818;color:var(--red)}.pill.blue{background:#7bc6ff18;color:var(--blue)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.section-head{grid-column:span 12;display:flex;align-items:center;justify-content:space-between;margin:8px 2px -3px}.section-head h3{font-size:17px;margin:0}.section-head span{font-size:11px;color:var(--muted)}
+.device-grid{grid-column:span 12;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.device{background:linear-gradient(145deg,rgba(25,37,62,.97),rgba(17,26,45,.97));border:1px solid var(--line);border-radius:17px;padding:16px;min-width:0;transition:.18s}
+.device:hover{transform:translateY(-2px);border-color:#ffffff25}.device.is-on{border-color:#68dfbd55}
+.device-top{display:flex;justify-content:space-between;align-items:center}.device-icon{width:42px;height:42px;border-radius:14px;background:#293653;display:grid;place-items:center;font-size:21px}.device.is-on .device-icon{background:#68dfbd1c}
+.device h4{font-size:14px;margin:12px 0 1px}.device p{font-size:11px;color:var(--muted);margin:0}
+.toggle{border:0;width:42px;height:24px;border-radius:30px;background:#3a465f;padding:3px;cursor:pointer;transition:.2s;flex:none}.toggle:after{content:"";display:block;width:18px;height:18px;border-radius:50%;background:#c3ccdc;transition:.2s}.toggle.on{background:#5fcbad}.toggle.on:after{transform:translateX(18px);background:#102c2a}
+.btn{border:1px solid var(--line);background:#263653;color:#f3f6ff;border-radius:11px;padding:9px 13px;cursor:pointer;font-weight:700;font-size:12px;transition:.16s}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#a5b0ff,#6fdbbd);color:#101a2b;border:0}.btn.ghost{background:#ffffff08}.btn.danger{background:#ff7d8816;color:#ff9aa2;border-color:#ff7d8833}.btn.small{padding:7px 10px;font-size:11px}.btn:disabled{opacity:.4;cursor:not-allowed}
+.climate{grid-column:span 7}.security{grid-column:span 5}.voice{grid-column:span 7}.energy{grid-column:span 5}.activity{grid-column:span 7}.quick-scenes{grid-column:span 5}
+.range-row{display:flex;justify-content:space-between;align-items:center;margin:13px 0 7px;gap:10px}.range-row strong{font-size:19px}.range-row small,.range-foot{color:var(--muted);font-size:11px}
+input[type=range]{width:100%;accent-color:var(--mint);cursor:pointer}.range-foot{display:flex;justify-content:space-between;font-size:10px}
+.status-box{display:flex;align-items:center;gap:12px;padding:13px;background:#68dfbd12;border:1px solid #68dfbd2b;border-radius:14px}.status-box.warn{background:#ffc66e0e;border-color:#ffc66e33}.status-box.danger{background:#ff7d8810;border-color:#ff7d8840}
+.status-icon{font-size:23px}.status-box strong{display:block}.status-box small{color:var(--muted);font-size:11px}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.voicebox{display:flex;align-items:center;gap:13px}.mic{width:51px;height:51px;border:0;border-radius:16px;background:linear-gradient(135deg,#a5b0ff,#6fdbbd);font-size:22px;cursor:pointer;color:#101a2b;flex:none}
+.mic.listening{animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 12px #68dfbd08}}
+.voice-copy strong{display:block}.voice-copy small{color:var(--muted);font-size:11px}
+.command{margin-top:13px;padding:10px 12px;background:#10182b;border:1px solid var(--line);border-radius:11px;color:#bdc9e2;font-size:11px;min-height:40px}
+.command-row{display:flex;gap:8px;margin-top:9px}.text-input,.number-input,.select-input{background:#10182b;border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:white;min-width:0;outline:none}.text-input:focus,.number-input:focus,.select-input:focus{border-color:#8b9cff88}.command-row .text-input{flex:1}
+.energy-number{font-size:30px;font-weight:780;letter-spacing:-1px}.energy-number span{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}.energy-bar{height:8px;background:#2a3550;border-radius:20px;overflow:hidden;margin:12px 0}.energy-bar i{display:block;height:100%;width:42%;background:linear-gradient(90deg,#8e9fff,#6de0bd);border-radius:20%;transition:width .2s}
+.activity-list{display:grid}.activity-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}.activity-item:last-child{border:0}.activity-icon{width:34px;height:34px;border-radius:11px;background:#2a3550;display:grid;place-items:center;flex:none}.activity-item strong{font-size:12px;display:block}.activity-item small{color:var(--muted);font-size:10px}
+.scene-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.scene{border:1px solid var(--line);background:#ffffff07;border-radius:13px;padding:12px;text-align:left;cursor:pointer;transition:.16s}.scene:hover{background:#ffffff11;border-color:#ffffff25}.scene .scene-icon{font-size:20px}.scene strong{display:block;font-size:12px;margin-top:6px}.scene small{color:var(--muted);font-size:10px}
+.page-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin:3px 0 20px}.page-heading h2{font-size:24px;letter-spacing:-.6px;margin:5px 0}.page-heading p{color:var(--muted);margin:0;font-size:12px}
+.room-panel{grid-column:span 12}.room-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:17px}.room-tab{background:#ffffff08;border:1px solid var(--line);color:var(--muted);border-radius:30px;padding:8px 13px;cursor:pointer;font-size:11px;font-weight:700}.room-tab.active{background:#9aaaff20;color:#dce2ff;border-color:#9aaaff66}
+.room-device-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.control-line{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.control-line label{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-bottom:5px}
+.auto-grid{grid-column:span 12;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.auto-card{display:flex;gap:13px;align-items:flex-start}.auto-symbol{width:43px;height:43px;border-radius:14px;background:#293653;display:grid;place-items:center;font-size:21px;flex:none}.auto-copy{flex:1;min-width:0}.auto-copy strong{display:block;font-size:13px}.auto-copy p{font-size:11px;color:var(--muted);margin:3px 0 10px}
+.auto-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sensor-grid{grid-column:span 12;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.sensor-card{padding:16px;background:#ffffff07;border:1px solid var(--line);border-radius:15px}.sensor-top{display:flex;align-items:center;justify-content:space-between}.sensor-card strong{display:block;margin-top:10px}.sensor-card small{color:var(--muted)}
+.alert-banner{padding:13px 15px;border:1px solid #ff7d8840;background:#ff7d8811;border-radius:14px;color:#ffb0b6;margin-bottom:14px;display:none}.alert-banner.show{display:block}
+.calculator{grid-column:span 7}.usage{grid-column:span 5}.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.field input{width:100%}.cost-result{padding:15px;border-radius:14px;background:#68dfbd10;border:1px solid #68dfbd28;margin-top:15px}.cost-result small{color:var(--muted)}.cost-result strong{font-size:26px;display:block}
+.table{width:100%;border-collapse:collapse;font-size:11px}.table th,.table td{text-align:left;padding:10px 7px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-weight:600}.table td:last-child,.table th:last-child{text-align:right}
+.empty{color:var(--muted);font-size:12px;padding:15px 0}
+.footer{text-align:center;color:#667590;font-size:10px;padding:23px 0 5px}
+.toast{position:fixed;right:22px;bottom:22px;max-width:min(390px,calc(100vw - 44px));background:#e7fff7;color:#12352c;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:750;font-size:12px;opacity:0;transform:translateY(12px);transition:.24s;pointer-events:none;z-index:20}.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:1100px){.device-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.welcome{grid-column:span 7}.weather{grid-column:span 5}.climate,.security,.voice,.energy,.activity,.quick-scenes,.calculator,.usage{grid-column:span 12}.room-device-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;padding:13px 13px 10px;border-right:0;border-bottom:1px solid var(--line);gap:12px}.brand{padding:0 3px}.nav{display:flex;overflow-x:auto;padding-bottom:2px}.nav-label,.side-bottom{display:none}.nav button{white-space:nowrap;width:auto;padding:9px 11px;font-size:11px}.nav .ico{width:auto}.main{padding:20px 13px}.topbar{align-items:flex-start}.profile{font-size:0;padding:5px}.profile .avatar{width:32px;height:32px}.welcome,.weather{grid-column:span 12}.welcome{min-height:165px}.grid{gap:12px}.card{padding:15px}.device-grid{gap:10px}.device{padding:13px}.room-device-grid,.sensor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.auto-grid{grid-template-columns:1fr}.page-heading{align-items:flex-start;flex-direction:column}.scene-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.device-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.room-device-grid,.sensor-grid{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr}.welcome h2{font-size:22px}.welcome:after{right:-12px;font-size:175px}}
+
+.trace-list{display:grid;gap:12px}.trace-run{padding:13px;background:#10192c;border:1px solid var(--line);border-radius:13px}.trace-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.trace-head strong{font-size:12px}.trace-head small{color:var(--muted);font-size:10px}.trace-steps{display:grid;gap:8px}.trace-step{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:start}.trace-number{width:22px;height:22px;border-radius:50%;background:#293653;color:#b9c6ff;display:grid;place-items:center;font-size:10px;font-weight:800}.trace-step strong{display:block;font-size:11px}.trace-step small{display:block;color:var(--muted);font-size:10px;line-height:1.45}.trace-empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:11px}
+
+
+/* DomusOS local sign-in / sign-up */
+body:not(.authenticated) .app{display:none}
+body.authenticated #authScreen{display:none}
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 15% 15%,#26365b 0,transparent 36%),radial-gradient(circle at 90% 85%,#163a43 0,transparent 32%),#090f1e}
+.auth-shell{width:min(1080px,100%);min-height:650px;display:grid;grid-template-columns:minmax(0,1fr) 440px;overflow:hidden;border:1px solid #ffffff18;border-radius:28px;background:#111a2d;box-shadow:0 30px 90px #0008}
+.auth-aside{padding:42px 46px;position:relative;overflow:hidden;background:linear-gradient(145deg,#1b2b49 0%,#121d33 58%,#102b35 100%);display:flex;flex-direction:column}
+.auth-aside:before,.auth-aside:after{content:"";position:absolute;border:1px solid #a7b5ff20;border-radius:50%;pointer-events:none}
+.auth-aside:before{width:430px;height:430px;right:-150px;bottom:-170px}
+.auth-aside:after{width:310px;height:310px;right:-90px;bottom:-110px}
+.auth-brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.auth-brandmark{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,#a8b3ff,#69e3c1);display:grid;place-items:center;color:#111a2d;font-size:25px;font-weight:900}
+.auth-brand strong{font-size:19px}.auth-brand small{display:block;font-size:10px;color:#aab9d3;letter-spacing:1.7px;text-transform:uppercase}
+.auth-copy{position:relative;z-index:1;margin:auto 0;padding:68px 0 56px}
+.auth-eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mint);font-weight:850}
+.auth-copy h1{font-size:clamp(34px,4vw,49px);line-height:1.07;letter-spacing:-1.7px;margin:13px 0}
+.auth-copy p{max-width:420px;color:#b0bfd8;font-size:14px;line-height:1.8}
+.auth-benefits{display:grid;gap:13px;margin-top:28px}
+.auth-benefit{display:flex;align-items:center;gap:11px;color:#dfe7f7;font-size:12px}
+.auth-benefit span:first-child{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#ffffff12;font-size:15px}
+.auth-aside-note{position:relative;z-index:1;color:#8294b2;font-size:10px;margin-top:auto}
+.auth-panel{padding:42px 38px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,#17243c,#111a2c)}
+.auth-panel h2{font-size:25px;letter-spacing:-.6px;margin:0 0 6px}
+.auth-panel .auth-subtitle{font-size:12px;color:var(--muted);margin:0 0 23px}
+.auth-form{display:grid;gap:14px}
+.auth-field label{display:block;color:#c4cde0;font-size:11px;font-weight:700;margin:0 0 6px}
+.auth-field input{width:100%;background:#0d1628;border:1px solid #ffffff18;border-radius:11px;padding:12px 13px;color:#f5f7ff;outline:none}
+.auth-field input:focus{border-color:#9aaaff99;box-shadow:0 0 0 3px #9aaaff18}
+.auth-field input::placeholder{color:#697a98}
+.auth-options{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px}
+.auth-check{display:flex;align-items:center;gap:7px}.auth-check input{accent-color:#68dfbd}
+.auth-submit{width:100%;padding:12px 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#a5b0ff,#6fdbbd);color:#101a2b;font-weight:850;cursor:pointer;margin-top:3px}
+.auth-submit:hover{filter:brightness(1.06)}
+.auth-switch{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}
+.auth-switch button{border:0;background:none;color:#aebaff;font-weight:800;cursor:pointer;padding:3px}
+.auth-message{display:none;padding:10px 12px;border-radius:10px;font-size:11px;line-height:1.5;margin:-7px 0 13px}
+.auth-message.show{display:block}.auth-message.error{color:#ffb2b8;background:#ff7d8815;border:1px solid #ff7d8833}.auth-message.success{color:#8cebd0;background:#68dfbd12;border:1px solid #68dfbd33}
+.auth-security-note{font-size:10px;line-height:1.6;color:#7385a4;margin-top:20px;padding-top:15px;border-top:1px solid var(--line)}
+.auth-hidden{display:none!important}
+.logout-btn{border:1px solid var(--line);background:#ffffff08;color:#bac7df;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:750;cursor:pointer;margin-left:5px}
+.logout-btn:hover{background:#ff7d8818;color:#ffb0b6;border-color:#ff7d8840}
+@media(max-width:800px){.auth-screen{padding:14px}.auth-shell{grid-template-columns:1fr;max-width:520px;min-height:0}.auth-aside{padding:24px 25px}.auth-copy{padding:35px 0 25px}.auth-copy h1{font-size:34px}.auth-benefits{grid-template-columns:1fr 1fr;gap:9px}.auth-aside-note{margin-top:15px}.auth-panel{padding:30px 25px}}
+@media(max-width:430px){.auth-benefits{grid-template-columns:1fr}.auth-panel{padding:26px 19px}.auth-aside{padding:22px 20px}.auth-options{align-items:flex-start;flex-direction:column}.profile .user-label{display:none}.logout-btn{padding:6px 7px}}
+
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen">
+ <div class="auth-shell">
+  <section class="auth-aside">
+   <div class="auth-brand"><div class="auth-brandmark">⌂</div><div><strong>DomusOS</strong><small>Smart living</small></div></div>
+   <div class="auth-copy">
+    <div class="auth-eyebrow">A smarter way to live</div>
+    <h1>Your home,<br>in one place.</h1>
+    <p>Sign in to manage your DomusOS dashboard, room devices, home scenes, automations, safety alerts and energy estimates.</p>
+    <div class="auth-benefits">
+     <div class="auth-benefit"><span>💡</span><span>Lighting & device controls</span></div>
+     <div class="auth-benefit"><span>↯</span><span>Smart home automations</span></div>
+     <div class="auth-benefit"><span>🛡️</span><span>Safety & sensor alerts</span></div>
+     <div class="auth-benefit"><span>ϟ</span><span>Energy & cost estimates</span></div>
+    </div>
+   </div>
+   <div class="auth-aside-note">DomusOS · Local smart-home interface preview</div>
+  </section>
+  <section class="auth-panel">
+   <div id="loginView">
+    <div class="auth-eyebrow">WELCOME BACK</div>
+    <h2>Sign in to DomusOS</h2>
+    <p class="auth-subtitle">Enter your account details to open your smart-home dashboard.</p>
+    <div id="loginMessage" class="auth-message" role="alert"></div>
+    <form class="auth-form" id="loginForm" novalidate>
+     <div class="auth-field"><label for="loginEmail">Email address</label><input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@example.com" required></div>
+     <div class="auth-field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></div>
+     <div class="auth-options"><label class="auth-check"><input id="rememberMe" type="checkbox"> Keep me signed in on this browser</label><span>Local account</span></div>
+     <button class="auth-submit" type="submit">Sign in</button>
+    </form>
+    <div class="auth-switch">New to DomusOS? <button type="button" onclick="showSignup()">Create an account</button></div>
+   </div>
+   <div id="signupView" class="auth-hidden">
+    <div class="auth-eyebrow">GET STARTED</div>
+    <h2>Create your account</h2>
+    <p class="auth-subtitle">Set up a local DomusOS profile for this browser.</p>
+    <div id="signupMessage" class="auth-message" role="alert"></div>
+    <form class="auth-form" id="signupForm" novalidate>
+     <div class="auth-field"><label for="signupName">Full name</label><input id="signupName" name="name" type="text" autocomplete="name" maxlength="60" placeholder="Your name" required></div>
+     <div class="auth-field"><label for="signupEmail">Email address</label><input id="signupEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+     <div class="auth-field"><label for="signupPassword">Create password</label><input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required></div>
+     <div class="auth-field"><label for="signupConfirm">Confirm password</label><input id="signupConfirm" name="confirm" type="password" autocomplete="new-password" minlength="8" placeholder="Enter the password again" required></div>
+     <label class="auth-check" style="font-size:10px;color:var(--muted)"><input id="localAccountNotice" type="checkbox" required> I understand this demo account is stored in the local DomusOS database.</label>
+     <button class="auth-submit" type="submit">Create account</button>
+    </form>
+    <div class="auth-switch">Already have an account? <button type="button" onclick="showLogin()">Sign in</button></div>
+   </div>
+   <div class="auth-security-note">Demo authentication: your account is stored locally in this browser and is not sent to a server. It will not sync across devices or provide production-grade account security. Do not reuse a sensitive password.</div>
+  </section>
+ </div>
+</div>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><div class="brandmark">⌂</div><div><strong>DomusOS</strong><small>Smart living</small></div></div>
+ <div><div class="nav-label">HOME CONTROL</div><nav class="nav" aria-label="Main navigation">
+  <button class="active" data-page="dashboard"><span class="ico">▦</span> Overview</button>
+  <button data-page="rooms"><span class="ico">⌂</span> Rooms & devices</button>
+  <button data-page="automations"><span class="ico">↯</span> Automations</button>
+  <button data-page="safety"><span class="ico">◇</span> Safety & alerts</button>
+  <button data-page="energy"><span class="ico">ϟ</span> Energy & cost</button>
+  <button data-page="activity"><span class="ico">◷</span> Activity history</button>
+ </nav></div>
+ <div class="side-bottom"><small>HOME CONNECTION</small><strong><span class="status-dot" style="color:var(--mint)"></span>Local demo is ready</strong><span class="pill"><i class="dot"></i> All controls available</span></div>
+</aside>
+
+<main class="main">
+<header class="topbar"><div><div class="eyebrow" id="todayLabel">YOUR HOME AT A GLANCE</div><h1 id="pageTitle">Good afternoon</h1><p id="pageSubtitle">Manage your home, comfort and safety from one place.</p></div><div class="profile"><div class="avatar" id="profileAvatar">D</div><span class="user-label" id="profileName">Local User</span><button class="logout-btn" type="button" onclick="logoutDomusUser()">Sign out</button></div></header>
+
+<!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+ <div class="grid">
+  <div class="card welcome"><div><div class="eyebrow">WELCOME HOME</div><h2>Your space, your comfort.</h2><p>Control your lights, climate, curtains and home safety. Your dashboard brings everyday controls and safety alerts together.</p><div class="welcome-actions"><button class="btn primary" onclick="applyScene('Home')">⌂ Home scene</button><button class="btn ghost" onclick="showPage('rooms')">Manage devices →</button></div></div><span class="pill"><i class="dot"></i> Demo controls active</span></div>
+  <div class="card weather"><div class="weather-top"><div><small>INDOOR TEMPERATURE</small><div class="weather-temp" id="dashTemp">24°</div></div><div style="font-size:34px">🌡️</div></div><div class="weather-bottom"><div><strong id="dashComfort">Comfortable</strong><span>Room sensor · simulated</span></div><div style="text-align:right"><strong id="dashFan">Fan level 2</strong><span>Climate status</span></div></div></div>
+  <div class="section-head"><h3>Quick device controls</h3><span id="deviceCount">2 of 5 devices active</span></div>
+  <div class="device-grid" id="dashboardDevices"></div>
+
+  <div class="card climate"><div class="card-title"><h3>Climate & lighting</h3><span class="hint">Living room environment</span></div>
+   <div class="range-row"><div><small class="muted">Target temperature</small><br><strong id="tempValue">24°C</strong></div><span style="font-size:25px">🌡️</span></div><input id="tempTarget" type="range" min="16" max="30" value="24"><div class="range-foot"><span>16°C</span><span>30°C</span></div>
+   <div class="range-row"><div><small class="muted">Fan speed</small><br><strong id="fanValue">2 / 5</strong></div><span style="font-size:23px">🌀</span></div><input id="fanSpeed" type="range" min="1" max="5" value="2"><div class="range-foot"><span>Low</span><span>High</span></div>
+   <div class="range-row"><div><small class="muted">Living room brightness</small><br><strong id="brightnessValue">70%</strong></div><span style="font-size:23px">💡</span></div><input id="brightness" type="range" min="5" max="100" value="70"><div class="range-foot"><span>Dim</span><span>Bright</span></div>
+  </div>
+  <div class="card security"><div class="card-title"><h3>Home security</h3><span class="hint">Security panel</span></div><div class="status-box" id="securityBox"><div class="status-icon">🛡️</div><div><strong id="securityText">System disarmed</strong><small id="securitySub">Arm the system to monitor simulated entry sensors</small></div></div><div class="action-row"><button class="btn primary" id="securityButton" onclick="toggleSecurity()">Arm system</button><button class="btn ghost" onclick="showPage('safety')">Sensor panel →</button></div><div class="muted" style="font-size:10px;margin-top:12px">Door, motion and smoke sensor tests are available in Safety & alerts.</div></div>
+
+  <div class="card voice"><div class="card-title"><h3>Voice assistant</h3><span class="hint">Voice or typed commands</span></div><div class="voicebox"><button class="mic" id="micButton" onclick="startVoice()" aria-label="Start voice command">🎙️</button><div class="voice-copy"><strong>Talk to your home</strong><small>Try “turn on the bedroom lights” or “set temperature to 22”.</small></div></div><div class="command" id="voiceResult" aria-live="polite">Tap the microphone and allow access, or type a command below.</div><div style="font-size:10px;color:var(--muted);margin-top:7px">For voice input, run this page from localhost with the included Windows launcher. Typed commands work without microphone permission.</div><div class="command-row"><input class="text-input" id="typedCommand" placeholder="Type a command…" aria-label="Type a voice command"><button class="btn" onclick="runTypedCommand()">Run</button></div></div>
+  <div class="card quick-scenes"><div class="card-title"><h3>Home scenes</h3><span class="hint">One-tap routines</span></div><div class="scene-grid">
+   <button class="scene" onclick="applyScene('Home')"><span class="scene-icon">🏡</span><strong>Home</strong><small>Comfortable everyday setup</small></button>
+   <button class="scene" onclick="applyScene('Away')"><span class="scene-icon">🚪</span><strong>Away</strong><small>Switch off and secure</small></button>
+   <button class="scene" onclick="applyScene('Good Night')"><span class="scene-icon">🌙</span><strong>Good Night</strong><small>Quiet lights and locked door</small></button>
+   <button class="scene" onclick="applyScene('Bright Day')"><span class="scene-icon">☀️</span><strong>Bright Day</strong><small>Bright lights and airflow</small></button>
+  </div></div>
+  <div class="card energy"><div class="card-title"><h3>Energy today</h3><span class="hint">Estimated</span></div><small class="muted">Current connected load</small><div class="energy-number" id="dashWatts">79 <span>W</span></div><div class="energy-bar"><i id="dashEnergyBar"></i></div><div style="display:flex;justify-content:space-between"><small class="muted">Estimated daily usage</small><strong id="dashKwh" style="font-size:12px">0.8 kWh</strong></div><button class="btn ghost small" style="margin-top:12px" onclick="showPage('energy')">View electricity cost →</button></div>
+  <div class="card activity"><div class="card-title"><h3>Recent activity</h3><button class="btn ghost small" onclick="showPage('activity')">View all →</button></div><div class="activity-list" id="dashActivity"></div></div>
+ </div>
+</section>
+
+<!-- ROOMS -->
+<section class="page" id="page-rooms">
+ <div class="page-heading"><div><div class="eyebrow">DEVICE MANAGEMENT</div><h2>Rooms & devices</h2><p>Control each room's lights, fan, curtains and smart plug.</p></div><span class="pill"><i class="dot"></i> Interactive controls</span></div>
+ <div class="grid"><div class="card room-panel"><div class="card-title"><h3>Choose a room</h3><span class="hint">Device status updates instantly</span></div><div class="room-tabs" id="roomTabs"><button class="room-tab active" data-room="All">All rooms</button><button class="room-tab" data-room="Living room">Living room</button><button class="room-tab" data-room="Bedroom">Bedroom</button><button class="room-tab" data-room="Kitchen">Kitchen</button></div><div class="room-device-grid" id="roomDevices"></div></div>
+ <div class="card" style="grid-column:span 12"><div class="card-title"><h3>Room comfort settings</h3><span class="hint">Living room</span></div><div class="grid">
+  <div style="grid-column:span 6"><div class="range-row"><strong>Temperature</strong><strong id="roomTempValue">24°C</strong></div><input id="roomTemp" type="range" min="16" max="30" value="24"></div>
+  <div style="grid-column:span 6"><div class="range-row"><strong>Ambient brightness</strong><strong id="roomBrightValue">70%</strong></div><input id="roomBright" type="range" min="5" max="100" value="70"></div>
+ </div></div></div>
+</section>
+
+<!-- AUTOMATIONS -->
+<section class="page" id="page-automations">
+ <div class="page-heading"><div><div class="eyebrow">SMART ROUTINES</div><h2>Automations</h2><p>Enable automatic responses to temperature and ambient light changes.</p></div><span class="pill blue"><i class="dot"></i> Rule-based demo</span></div>
+ <div class="grid">
+  <div class="auto-grid">
+   <div class="card auto-card"><div class="auto-symbol">☀️</div><div class="auto-copy"><strong>Adaptive lighting</strong><p>Adjust living-room light brightness when the ambient light level changes.</p><div class="auto-bottom"><span class="muted" style="font-size:10px" id="lightAutoStatus">Disabled</span><button class="toggle" id="autoLightToggle" role="switch" aria-checked="false" onclick="toggleAutomation('light')"></button></div></div></div>
+   <div class="card auto-card"><div class="auto-symbol">🌡️</div><div class="auto-copy"><strong>Temperature-based fan</strong><p>Automatically run the fan when the room temperature reaches your chosen threshold.</p><div class="auto-bottom"><span class="muted" style="font-size:10px" id="tempAutoStatus">Disabled</span><button class="toggle" id="autoTempToggle" role="switch" aria-checked="false" onclick="toggleAutomation('temp')"></button></div></div></div>
+   <div class="card auto-card"><div class="auto-symbol">🚨</div><div class="auto-copy"><strong>Safety notifications</strong><p>Create an alert when a door or motion sensor is triggered while the security system is armed.</p><div class="auto-bottom"><span class="muted" style="font-size:10px" id="safetyAutoStatus">Enabled</span><button class="toggle on" id="autoSafetyToggle" role="switch" aria-checked="true" onclick="toggleAutomation('safety')"></button></div></div></div>
+   <div class="card auto-card"><div class="auto-symbol">🔔</div><div class="auto-copy"><strong>Voice safety announcements</strong><p>Use browser speech to announce safety alerts when speech synthesis is available.</p><div class="auto-bottom"><span class="muted" style="font-size:10px" id="voiceAutoStatus">Enabled</span><button class="toggle on" id="autoVoiceToggle" role="switch" aria-checked="true" onclick="toggleAutomation('voice')"></button></div></div></div>
+  </div>
+  <div class="card" style="grid-column:span 12"><div class="card-title"><h3>Automation sensors</h3><span class="hint">Change values to test the rules</span></div>
+   <div class="grid">
+    <div style="grid-column:span 6"><div class="range-row"><div><small class="muted">Ambient light level</small><br><strong id="luxValue">450 lux</strong></div><span style="font-size:22px">☀️</span></div><input id="luxRange" type="range" min="0" max="1000" value="450"><div class="range-foot"><span>Dark · 0</span><span>Bright · 1000</span></div></div>
+    <div style="grid-column:span 6"><div class="range-row"><div><small class="muted">Room temperature</small><br><strong id="sensorTempValue">24°C</strong></div><span style="font-size:22px">🌡️</span></div><input id="sensorTemp" type="range" min="10" max="40" value="24"><div class="range-foot"><span>10°C</span><span>40°C</span></div></div>
+   </div>
+   <p class="muted" style="font-size:10px;margin:13px 0 0">These are simulated sensor readings. Move the sliders to see enabled automations respond.</p>
+  </div>
+  
+  <div class="card" style="grid-column:span 12"><div class="card-title"><h3>Automation execution trace</h3><span class="hint">Step-by-step rule evaluation</span></div><div class="trace-list" id="automationTrace"><div class="trace-empty">Enable adaptive lighting or temperature-based fan control, then move a sensor slider to see each decision step.</div></div></div>
+
+ </div>
+</section>
+
+<!-- SAFETY -->
+<section class="page" id="page-safety">
+ <div class="page-heading"><div><div class="eyebrow">HOME PROTECTION</div><h2>Safety & alerts</h2><p>Arm your demo security system and test the sensors and safety notifications.</p></div><button class="btn primary" id="safetyArmButton" onclick="toggleSecurity()">Arm system</button></div>
+ <div class="alert-banner" id="alertBanner" role="alert"></div>
+ <div class="grid">
+  <div class="card" style="grid-column:span 5"><div class="card-title"><h3>Security status</h3><span class="hint">Entry monitoring</span></div><div class="status-box" id="safetySecurityBox"><div class="status-icon">🛡️</div><div><strong id="safetySecurityText">System disarmed</strong><small id="safetySecuritySub">Entry monitoring is inactive</small></div></div><div class="action-row"><button class="btn primary" onclick="toggleSecurity()" id="safetySecurityAction">Arm system</button><button class="btn ghost" onclick="clearAlerts()">Clear alerts</button></div></div>
+  <div class="card" style="grid-column:span 7"><div class="card-title"><h3>Sensor test panel</h3><span class="hint">Simulated sensors</span></div><div class="sensor-grid">
+   <div class="sensor-card"><div class="sensor-top"><span style="font-size:21px">🚪</span><span class="pill" id="doorStatus"><i class="dot"></i> Closed</span></div><strong>Front door</strong><small>Entry contact sensor</small><button class="btn small" style="margin-top:12px;width:100%" onclick="triggerSensor('door')">Test door</button></div>
+   <div class="sensor-card"><div class="sensor-top"><span style="font-size:21px">🏃</span><span class="pill" id="motionStatus"><i class="dot"></i> Clear</span></div><strong>Motion detector</strong><small>Living room movement</small><button class="btn small" style="margin-top:12px;width:100%" onclick="triggerSensor('motion')">Test motion</button></div>
+   <div class="sensor-card"><div class="sensor-top"><span style="font-size:21px">🔥</span><span class="pill" id="smokeStatus"><i class="dot"></i> Normal</span></div><strong>Smoke detector</strong><small>Safety sensor simulation</small><button class="btn small" style="margin-top:12px;width:100%" onclick="triggerSensor('smoke')">Test smoke alert</button></div>
+  </div></div>
+  <div class="card" style="grid-column:span 12"><div class="card-title"><h3>Alert centre</h3><span class="hint">Latest safety events</span></div><div class="activity-list" id="safetyAlerts"><div class="empty">No active safety alerts. Use the sensor test buttons to try an alert.</div></div></div>
+ </div>
+</section>
+
+<!-- ENERGY -->
+<section class="page" id="page-energy">
+ <div class="page-heading"><div><div class="eyebrow">POWER & ESTIMATES</div><h2>Energy & electricity cost</h2><p>Estimate consumption from your device settings and your electricity tariff.</p></div><span class="pill blue"><i class="dot"></i> Live estimate</span></div>
+ <div class="grid">
+  <div class="card calculator"><div class="card-title"><h3>Electricity cost calculator</h3><span class="hint">Editable assumptions</span></div>
+   <div class="calc-grid">
+    <div class="field"><label for="tariff">Electricity rate (₹ per kWh)</label><input class="number-input" type="number" id="tariff" min="0" max="1000" step=".1" value="8"></div>
+    <div class="field"><label for="hours">Average use per day (hours)</label><input class="number-input" type="number" id="hours" min="0" max="24" step=".5" value="8"></div>
+    <div class="field"><label for="days">Billing period (days)</label><input class="number-input" type="number" id="days" min="1" max="366" value="30"></div>
+    <div class="field"><label for="extraWatt">Additional load (watts)</label><input class="number-input" type="number" id="extraWatt" min="0" max="100000" value="0"></div>
+   </div>
+   <div class="cost-result"><small>Estimated electricity cost for this billing period</small><strong id="estimatedCost">₹0.00</strong><small id="costDetail">Based on the currently selected devices and assumptions.</small></div>
+   <div class="action-row"><button class="btn primary" onclick="calculateCost()">Calculate again</button><button class="btn ghost" onclick="resetCalculator()">Reset values</button></div>
+  </div>
+  <div class="card usage"><div class="card-title"><h3>Current home load</h3><span class="hint">Estimated</span></div><div class="energy-number" id="energyWatts">0 <span>W</span></div><div class="energy-bar"><i id="energyBar"></i></div><div style="display:flex;justify-content:space-between"><small class="muted">Daily consumption</small><strong id="energyDaily" style="font-size:12px">0.00 kWh</strong></div><div style="display:flex;justify-content:space-between;margin-top:8px"><small class="muted">Monthly consumption</small><strong id="energyMonthly" style="font-size:12px">0.00 kWh</strong></div><p class="muted" style="font-size:10px;margin-top:14px">Estimates use illustrative device wattages and your chosen hours. They are not readings from a physical electricity meter.</p></div>
+  <div class="card" style="grid-column:span 12"><div class="card-title"><h3>Device power estimate</h3><span class="hint">Based on current device states</span></div><div style="overflow-x:auto"><table class="table"><thead><tr><th>Device</th><th>Room</th><th>Status</th><th>Rated power</th></tr></thead><tbody id="powerTable"></tbody></table></div></div>
+ </div>
+</section>
+
+<!-- ACTIVITY -->
+<section class="page" id="page-activity">
+ <div class="page-heading"><div><div class="eyebrow">HOME TIMELINE</div><h2>Activity history</h2><p>Review device changes, automation actions and safety events from this session.</p></div><button class="btn ghost" onclick="clearActivity()">Clear history</button></div>
+ <div class="card"><div class="card-title"><h3>All activity</h3><span class="hint" id="activityCount">0 events</span></div><div class="activity-list" id="fullActivity"></div></div>
+</section>
+
+<div class="footer">DomusOS · Smart home interface preview · All device and sensor actions are simulated locally in this browser.</div>
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const devices = {
+ livingLight:{name:"Living room lights",room:"Living room",icon:"💡",type:"light",on:true,watts:12,brightness:70},
+ bedroomLight:{name:"Bedroom lights",room:"Bedroom",icon:"🛏️",type:"light",on:false,watts:10,brightness:60},
+ fan:{name:"Ceiling fan",room:"Living room",icon:"🌀",type:"fan",on:true,watts:55,speed:2},
+ curtains:{name:"Smart curtains",room:"Living room",icon:"🪟",type:"curtain",open:false,watts:3},
+ kitchenPlug:{name:"Kitchen smart plug",room:"Kitchen",icon:"🔌",type:"plug",on:false,watts:40}
+};
+const state={security:false,automations:{light:false,temp:false,safety:true,voice:true},temperature:24,target:24,fanSpeed:2,brightness:70,lux:450,sensorTemp:24,doorOpen:false,motion:false,smoke:false,alerts:[],activity:[],trace:[],room:"All"};
+let toastTimer=null;
+const pageMeta={
+ dashboard:["Good afternoon","Manage your home, comfort and safety from one place."],
+ rooms:["Rooms & devices","Control each room's connected devices."],
+ automations:["Smart automations","Set up automatic responses to your home environment."],
+ safety:["Safety & alerts","Monitor sensors and review safety notifications."],
+ energy:["Energy & electricity cost","Estimate electricity use and your monthly cost."],
+ activity:["Activity history","Review what's happened around your home."]
+};
+function timeLabel(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
+function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
+function log(msg,icon="•"){state.activity.unshift({msg,icon,time:timeLabel()});state.activity=state.activity.slice(0,40);renderActivity()}
+function addAlert(msg,level="warning",icon="⚠️"){
+ const alert={msg,level,icon,time:timeLabel()};state.alerts.unshift(alert);state.alerts=state.alerts.slice(0,20);
+ renderAlerts();log(msg,icon);showAlertBanner(msg,level);
+ if(state.automations.voice) speak(level==="danger"?"Safety alert. "+msg:msg);
+}
+function showAlertBanner(msg,level){const b=$("alertBanner");b.textContent=(level==="danger"?"SMOKE / SAFETY ALERT: ":"HOME ALERT: ")+msg;b.classList.add("show");b.style.borderColor=level==="danger"?"#ff7d8870":"#ffc66e66";b.style.background=level==="danger"?"#ff7d8818":"#ffc66e12"}
+function speak(msg){if(!("speechSynthesis" in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(msg);u.lang="en-IN";u.rate=1;speechSynthesis.speak(u)}catch(e){}}
+function activeCount(){return Object.values(devices).filter(d=>d.type==="curtain"?d.open:d.on).length}
+function setDevice(id,on,quiet=false){
+ const d=devices[id];if(!d)return;
+ if(d.type==="curtain"){d.open=!!on}else{d.on=!!on}
+ if(!quiet){const stateText=d.type==="curtain"?(d.open?"opened":"closed"):(d.on?"turned on":"turned off");log(d.name+" "+stateText,d.icon);toast(d.name+" "+stateText)}
+ renderAll();
+}
+function toggleDevice(id){const d=devices[id];setDevice(id,d.type==="curtain"?!d.open:!d.on)}
+function deviceIsOn(d){return d.type==="curtain"?d.open:d.on}
+function deviceControl(d,id,compact=false){
+ const on=deviceIsOn(d);
+ let action=d.type==="curtain"?(d.open?"Close":"Open"):(d.on?"On":"Off");
+ const control=d.type==="curtain"?`<button class="btn small ${d.open?"primary":"ghost"}" onclick="Domus.toggleDevice('${id}')">${d.open?"Close curtains":"Open curtains"}</button>`:`<button class="toggle ${d.on?"on":""}" role="switch" aria-checked="${d.on}" aria-label="Toggle ${d.name}" onclick="Domus.toggleDevice('${id}')"></button>`;
+ let extra="";
+ if(d.type==="light"&&on)extra=`<div class="control-line"><label><span>Brightness</span><b>${d.brightness}%</b></label><input type="range" min="5" max="100" value="${d.brightness}" oninput="Domus.setBrightness('${id}',this.value)"></div>`;
+ if(d.type==="fan"&&on)extra=`<div class="control-line"><label><span>Speed</span><b>${d.speed}/5</b></label><input type="range" min="1" max="5" value="${d.speed}" oninput="Domus.setFanSpeed(this.value)"></div>`;
+ return `<div class="device ${on?"is-on":""}"><div class="device-top"><div class="device-icon">${d.icon}</div>${control}</div><h4>${d.name}</h4><p>${d.type==="curtain"?(d.open?"Open":"Closed"):d.on?"On":"Off"} · ${d.room}</p>${extra}</div>`;
+}
+function renderDevices(){
+ $("dashboardDevices").innerHTML=["livingLight","bedroomLight","fan","curtains"].map(id=>deviceControl(devices[id],id,true)).join("");
+ const ids=Object.keys(devices).filter(id=>state.room==="All"||devices[id].room===state.room);
+ $("roomDevices").innerHTML=ids.map(id=>deviceControl(devices[id],id)).join("")||'<div class="empty">No devices in this room.</div>';
+ $("deviceCount").textContent=activeCount()+" of 5 devices active";
+}
+function renderSecurity(){
+ const armed=state.security;
+ for(const boxId of ["securityBox","safetySecurityBox"]){$(boxId).className="status-box"+(armed?" warn":"")}
+ $("securityText").textContent=armed?"System armed":"System disarmed";
+ $("securitySub").textContent=armed?"Entry sensors are being monitored":"Arm the system to monitor simulated entry sensors";
+ $("securityButton").textContent=armed?"Disarm system":"Arm system";
+ $("safetySecurityText").textContent=armed?"System armed":"System disarmed";
+ $("safetySecuritySub").textContent=armed?"Entry monitoring is active":"Entry monitoring is inactive";
+ $("safetySecurityAction").textContent=armed?"Disarm system":"Arm system";
+ $("safetyArmButton").textContent=armed?"Disarm system":"Arm system";
+}
+function toggleSecurity(){state.security=!state.security;renderSecurity();log("Security system "+(state.security?"armed":"disarmed"),"🛡️");toast("Security system "+(state.security?"armed":"disarmed"))}
+
+function addTrace(title,steps){
+ state.trace.unshift({title,time:timeLabel(),steps});
+ state.trace=state.trace.slice(0,8);
+ renderAutomationTrace();
+}
+function renderAutomationTrace(){
+ const el=$("automationTrace");if(!el)return;
+ el.innerHTML=state.trace.map(run=>`<div class="trace-run"><div class="trace-head"><strong>${escapeHtml(run.title)}</strong><small>${run.time}</small></div><div class="trace-steps">${run.steps.map((step,index)=>`<div class="trace-step"><span class="trace-number">${index+1}</span><div><strong>${escapeHtml(step.label)}</strong><small>${escapeHtml(step.detail)}</small></div></div>`).join("")}</div></div>`).join("")||'<div class="trace-empty">No automation traces yet. Enable a routine and change a sensor value to generate a trace.</div>';
+}
+
+function renderActivity(){
+ const item=a=>`<div class="activity-item"><div class="activity-icon">${a.icon}</div><div><strong>${escapeHtml(a.msg)}</strong><small>${a.time} · This session</small></div></div>`;
+ $("dashActivity").innerHTML=state.activity.slice(0,4).map(item).join("")||'<div class="empty">No activity yet. Try a device control or scene.</div>';
+ $("fullActivity").innerHTML=state.activity.map(item).join("")||'<div class="empty">No activity yet. Your device and automation actions will appear here.</div>';
+ $("activityCount").textContent=state.activity.length+" events";
+}
+function renderAlerts(){
+ $("safetyAlerts").innerHTML=state.alerts.map(a=>`<div class="activity-item"><div class="activity-icon">${a.icon}</div><div><strong>${escapeHtml(a.msg)}</strong><small>${a.time} · ${a.level==="danger"?"Urgent safety alert":"Sensor notification"}</small></div><span class="pill ${a.level==="danger"?"danger":"warn"}">${a.level==="danger"?"Urgent":"Alert"}</span></div>`).join("")||'<div class="empty">No active safety alerts. Use the sensor test buttons to try an alert.</div>';
+ $("doorStatus").innerHTML=`<i class="dot"></i> ${state.doorOpen?"Open":"Closed"}`;$("doorStatus").className="pill "+(state.doorOpen?"warn":"");
+ $("motionStatus").innerHTML=`<i class="dot"></i> ${state.motion?"Motion":"Clear"}`;$("motionStatus").className="pill "+(state.motion?"warn":"");
+ $("smokeStatus").innerHTML=`<i class="dot"></i> ${state.smoke?"Alert":"Normal"}`;$("smokeStatus").className="pill "+(state.smoke?"danger":"");
+}
+function triggerSensor(which){
+ if(which==="door"){state.doorOpen=!state.doorOpen;renderAlerts();const monitored=state.security||state.automations.safety;addTrace("Front-door sensor",[{label:"Read sensor",detail:`Front door state: ${state.doorOpen?"open":"closed"}.`},{label:"Evaluate rule",detail:`Security armed or safety notifications enabled: ${monitored?"yes":"no"}.`},{label:"Apply response",detail:state.doorOpen&&monitored?"Create a door-open notification.":"No alert condition; record the sensor state."}]);if(state.doorOpen&&monitored)addAlert("Front door sensor detected an open door.", "warning","🚪");else{log("Front door "+(state.doorOpen?"opened":"closed"),"🚪");toast("Front door "+(state.doorOpen?"opened":"closed"))}}
+ if(which==="motion"){state.motion=!state.motion;renderAlerts();const monitored=state.security||state.automations.safety;addTrace("Motion sensor",[{label:"Read sensor",detail:`Living-room motion: ${state.motion?"detected":"clear"}.`},{label:"Evaluate rule",detail:`Security armed or safety notifications enabled: ${monitored?"yes":"no"}.`},{label:"Apply response",detail:state.motion&&monitored?"Create a motion notification.":"No alert condition; record the sensor state."}]);if(state.motion&&monitored)addAlert("Motion detected in the living room.", "warning","🏃");else{log("Motion sensor "+(state.motion?"detected movement":"cleared"),"🏃");toast("Motion sensor updated")}}
+ if(which==="smoke"){state.smoke=!state.smoke;renderAlerts();addTrace("Smoke detector",[{label:"Read sensor",detail:`Smoke detector state: ${state.smoke?"test alert":"normal"}.`},{label:"Evaluate rule",detail:state.smoke?"Smoke test alert is active.":"Sensor returned to normal."},{label:"Apply response",detail:state.smoke?"Show urgent alert and add an alert-centre entry.":"Clear the active smoke-test condition."}]);if(state.smoke)addAlert("Smoke detector test triggered. Check your surroundings and follow your household safety plan.", "danger","🔥");else{log("Smoke detector returned to normal","🔥");toast("Smoke detector returned to normal")}}
+}
+function clearAlerts(){state.alerts=[];state.doorOpen=false;state.motion=false;state.smoke=false;$("alertBanner").classList.remove("show");renderAlerts();toast("Safety alerts cleared");log("Safety alerts cleared","✓")}
+function applyScene(name){
+ const set=(id,on)=>{const d=devices[id];if(d.type==="curtain")d.open=on;else d.on=on};
+ if(name==="Home"){set("livingLight",true);set("bedroomLight",false);set("fan",true);set("curtains",true);state.security=false;state.brightness=70}
+ if(name==="Away"){set("livingLight",false);set("bedroomLight",false);set("fan",false);set("curtains",false);set("kitchenPlug",false);state.security=true}
+ if(name==="Good Night"){set("livingLight",false);set("bedroomLight",true);set("fan",true);set("curtains",false);state.security=true;state.brightness=25}
+ if(name==="Bright Day"){set("livingLight",true);set("bedroomLight",true);set("fan",true);set("curtains",true);state.security=false;state.brightness=100}
+ $("brightness").value=state.brightness;$("brightnessValue").textContent=state.brightness+"%";$("roomBright").value=state.brightness;$("roomBrightValue").textContent=state.brightness+"%";
+ renderAll();log(name+" scene activated","✨");toast(name+" scene activated");speak(name+" mode activated");
+}
+function setBrightness(id,value){devices[id].brightness=Number(value);if(id==="livingLight"){state.brightness=Number(value);$("brightness").value=value;$("brightnessValue").textContent=value+"%";$("roomBright").value=value;$("roomBrightValue").textContent=value+"%"}renderDevices();renderEnergy()}
+function setGlobalBrightness(value){state.brightness=Number(value);devices.livingLight.brightness=state.brightness;$("brightnessValue").textContent=value+"%";$("roomBright").value=value;$("roomBrightValue").textContent=value+"%";renderDevices();if(state.automations.light===false)log("Living room brightness set to "+value+"%","💡")}
+function setFanSpeed(value){state.fanSpeed=Number(value);devices.fan.speed=state.fanSpeed;$("fanValue").textContent=value+" / 5";$("roomTempValue").textContent=state.target+"°C";renderDevices();renderEnergy()}
+function setTempTarget(value){state.target=Number(value);$("tempValue").textContent=value+"°C";$("roomTempValue").textContent=value+"°C";if(state.automations.temp)runTempAutomation();renderAll()}
+function setSensorTemp(value){state.sensorTemp=Number(value);$("sensorTempValue").textContent=value+"°C";$("dashTemp").textContent=value+"°";if(state.automations.temp)runTempAutomation();renderComfort()}
+function renderComfort(){$("dashComfort").textContent=state.sensorTemp<19?"Cool":state.sensorTemp>27?"Warm":"Comfortable";$("dashFan").textContent="Fan level "+devices.fan.speed}
+function runTempAutomation(){
+ const reading=state.sensorTemp,threshold=state.target+2;let decision,action;
+ if(reading>=threshold){decision=`${reading}°C is at or above the ${threshold}°C trigger threshold.`;if(!devices.fan.on){devices.fan.on=true;log("Temperature automation turned on the ceiling fan","🌡️")}devices.fan.speed=Math.max(devices.fan.speed,3);action=`Fan is on at speed ${devices.fan.speed}/5.`}
+ else if(reading<=state.target){decision=`${reading}°C is at or below the ${state.target}°C target.`;if(devices.fan.speed!==2){devices.fan.speed=2;log("Temperature automation adjusted fan speed","🌡️")}action="Fan speed is set to the baseline level 2/5."}
+ else{decision=`${reading}°C is between the target and trigger threshold.`;action="No change; current fan setting is retained."}
+ addTrace("Temperature-based fan",[{label:"Read sensor",detail:`Room temperature: ${reading}°C.`},{label:"Evaluate rule",detail:decision},{label:"Apply action",detail:action},{label:"Update interface",detail:"Device card, climate controls and activity history are refreshed."}]);renderAll()
+}
+function runLightAutomation(){
+ const reading=state.lux;let decision;
+ if(reading<250){decision=`${reading} lux is below 250 lux; switch the living-room light on and raise brightness.`;devices.livingLight.on=true;devices.livingLight.brightness=Math.min(100,Math.max(70,Math.round(100-reading/10)))}
+ else if(reading>650){decision=`${reading} lux is above 650 lux; reduce brightness to 35%.`;devices.livingLight.brightness=35}
+ else{decision=`${reading} lux is in the normal band; set brightness to 70%.`;devices.livingLight.brightness=70}
+ state.brightness=devices.livingLight.brightness;$("brightness").value=state.brightness;$("brightnessValue").textContent=state.brightness+"%";$("roomBright").value=state.brightness;$("roomBrightValue").textContent=state.brightness+"%";log("Adaptive lighting adjusted to "+state.brightness+"%","☀️");
+ addTrace("Adaptive lighting",[{label:"Read sensor",detail:`Ambient light: ${reading} lux.`},{label:"Evaluate rule",detail:decision},{label:"Apply action",detail:`Living-room light ${devices.livingLight.on?"on":"unchanged"}; brightness ${state.brightness}%.`},{label:"Update interface",detail:"Lighting controls, dashboard device state and activity history are refreshed."}]);renderAll()
+}
+function toggleAutomation(which){state.automations[which]=!state.automations[which];const el=$("auto"+which[0].toUpperCase()+which.slice(1)+"Toggle");el.classList.toggle("on",state.automations[which]);el.setAttribute("aria-checked",String(state.automations[which]));const labels={light:"lightAutoStatus",temp:"tempAutoStatus",safety:"safetyAutoStatus",voice:"voiceAutoStatus"};$(labels[which]).textContent=state.automations[which]?"Enabled":"Disabled";log((which==="light"?"Adaptive lighting":which==="temp"?"Temperature-based fan":which==="safety"?"Safety notifications":"Voice announcements")+" "+(state.automations[which]?"enabled":"disabled"),"↯");if(which==="light"&&state.automations.light)runLightAutomation();if(which==="temp"&&state.automations.temp)runTempAutomation();toast("Automation "+(state.automations[which]?"enabled":"disabled"))}
+function powerNow(){return Object.values(devices).reduce((sum,d)=>sum+(d.type==="curtain"?(d.open?d.watts:0):(d.on?d.watts*(d.type==="light"?d.brightness/100:d.type==="fan"?d.speed/5:1):0)),0)}
+function readBoundedNumber(id,fallback,min,max,writeBack=false){
+ const el=$(id);const raw=String(el.value??"").trim();let value=raw===""?fallback:Number(raw);
+ if(!Number.isFinite(value))value=fallback;
+ value=Math.min(max,Math.max(min,value));
+ if(writeBack)el.value=String(value);
+ return value;
+}
+function renderEnergy(normalize=false){
+ const watts=powerNow(),hours=readBoundedNumber("hours",8,0,24,normalize),days=readBoundedNumber("days",30,1,366,normalize),extra=readBoundedNumber("extraWatt",0,0,100000,normalize),rate=readBoundedNumber("tariff",8,0,1000,normalize);
+ const daily=((watts+extra)*hours)/1000,monthly=daily*days,cost=monthly*rate;
+ $("dashWatts").innerHTML=Math.round(watts)+" <span>W</span>";$("dashKwh").textContent=daily.toFixed(2)+" kWh";$("dashEnergyBar").style.width=Math.min(100,watts/2)+"%";
+ $("energyWatts").innerHTML=Math.round(watts)+" <span>W</span>";$("energyDaily").textContent=daily.toFixed(2)+" kWh";$("energyMonthly").textContent=monthly.toFixed(2)+" kWh";$("energyBar").style.width=Math.min(100,watts/2)+"%";
+ $("estimatedCost").textContent="₹"+cost.toFixed(2);$("costDetail").textContent=monthly.toFixed(2)+" kWh × ₹"+rate.toFixed(2)+" per kWh";
+ $("powerTable").innerHTML=Object.values(devices).map(d=>{const on=deviceIsOn(d),use=d.type==="light"&&on?d.watts*d.brightness/100:d.type==="fan"&&on?d.watts*d.speed/5:on?d.watts:0;return `<tr><td>${d.icon} ${d.name}</td><td>${d.room}</td><td>${d.type==="curtain"?(d.open?"Open":"Closed"):(d.on?"On":"Off")}</td><td>${Math.round(use)} W</td></tr>`}).join("");
+}
+function calculateCost(){renderEnergy(true);toast("Electricity estimate updated")}
+function clearActivity(){state.activity=[];renderActivity();toast("Activity history cleared")}
+function resetCalculator(){$("tariff").value=8;$("hours").value=8;$("days").value=30;$("extraWatt").value=0;renderEnergy();toast("Calculator reset")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function showPage(name){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+name));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===name));$("pageTitle").textContent=pageMeta[name][0];$("pageSubtitle").textContent=pageMeta[name][1];if(name==="rooms")renderDevices();if(name==="energy")renderEnergy();if(name==="activity")renderActivity();if(name==="safety"){renderSecurity();renderAlerts()}window.scrollTo({top:0,behavior:"smooth"})}
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+document.querySelectorAll(".room-tab").forEach(b=>b.addEventListener("click",()=>{state.room=b.dataset.room;document.querySelectorAll(".room-tab").forEach(t=>t.classList.toggle("active",t===b));renderDevices()}));
+function executeCommand(raw){
+ const s=raw.toLowerCase().trim();if(!s)return;let done=false;
+ if(s.includes("good night")){applyScene("Good Night");done=true}
+ else if(s.includes("away mode")||s.includes("activate away")){applyScene("Away");done=true}
+ else if(s.includes("bright day")){applyScene("Bright Day");done=true}
+ else if(s.includes("home mode")||s==="home"){applyScene("Home");done=true}
+ else if(s.includes("arm security")){if(!state.security)toggleSecurity();done=true}
+ else if(s.includes("disarm security")){if(state.security)toggleSecurity();done=true}
+ else {
+  const aliases=[["livingLight",["living room light","living room lights","hall light"]],["bedroomLight",["bedroom light","bedroom lights"]],["fan",["ceiling fan","fan"]],["curtains",["curtain","curtains"]],["kitchenPlug",["kitchen plug","smart plug"]]];
+  for(const [id,words] of aliases){if(words.some(w=>s.includes(w))){const d=devices[id];if(s.includes("turn on")||s.includes("switch on")||s.includes("open")){setDevice(id,true);done=true}else if(s.includes("turn off")||s.includes("switch off")||s.includes("close")){setDevice(id,false);done=true}else if(s.includes("toggle")){toggleDevice(id);done=true}break}}
+  const temp=s.match(/(?:temperature|temp)(?:\s+(?:to|at))?\s*(\d{1,2})/);if(temp){const v=Math.min(30,Math.max(16,Number(temp[1])));$("tempTarget").value=v;setTempTarget(v);log("Target temperature set to "+v+"°C","🌡️");toast("Target temperature set to "+v+"°C");done=true}
+  const fan=s.match(/fan speed(?:\s+(?:to|at))?\s*(\d)/);if(fan){const v=Math.min(5,Math.max(1,Number(fan[1])));$("fanSpeed").value=v;setFanSpeed(v);log("Fan speed set to "+v,"🌀");toast("Fan speed set to "+v);done=true}
+ }
+ if(!done){$("voiceResult").textContent="Command not recognized. Try “turn on the fan”, “turn off bedroom lights”, “set temperature to 22”, or “good night”.";toast("Command not recognized")}else{$("voiceResult").textContent="Command completed: "+raw;speak("Done")}}
+function runTypedCommand(){const input=$("typedCommand");if(!input.value.trim())return;$("voiceResult").textContent="You: "+input.value;executeCommand(input.value);input.value=""}
+let activeRecognition = null;
+async function startVoice(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const output=$("voiceResult"), mic=$("micButton");
+ if(!SR){
+  output.textContent="This browser does not provide speech recognition. Open DomusOS in the latest Microsoft Edge or Google Chrome. You can still use the typed command box.";
+  toast("Speech recognition is unavailable in this browser");return;
+ }
+ if(location.protocol==="file:"){
+  output.textContent="Open DomusOS through the local server, not by double-clicking the HTML file. Put Start_DomusOS.bat in the same folder and double-click it, then use the page it opens.";
+  toast("Start DomusOS with the local server first");return;
+ }
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+  output.textContent="The browser cannot request microphone access from this page. Open the app using the local server at http://127.0.0.1:8765 and try again.";
+  toast("Microphone access needs localhost or HTTPS");return;
+ }
+ try{
+  output.textContent="Checking microphone permission…";
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  stream.getTracks().forEach(track=>track.stop());
+ }catch(err){
+  const messages={
+   NotAllowedError:"Microphone permission was blocked. In Edge, select the lock/site icon beside the address, set Microphone to Allow, then reload this page.",
+   PermissionDeniedError:"Microphone permission was blocked. Allow microphone access for this localhost page in Edge, then reload.",
+   NotFoundError:"No microphone was found. Connect or enable a microphone in Windows, then try again.",
+   NotReadableError:"The microphone is busy or unavailable. Close other apps using it, such as a meeting app, then try again.",
+   SecurityError:"The page is not allowed to use the microphone. Open DomusOS at http://127.0.0.1:8765 using the launcher."
+  };
+  output.textContent=messages[err.name]||("Could not access the microphone ("+err.name+"). Check Windows microphone privacy settings and Edge site permissions.");
+  toast("Microphone access failed");return;
+ }
+ try{
+  if(activeRecognition){try{activeRecognition.abort()}catch(e){}}
+  const rec=new SR();activeRecognition=rec;
+  rec.lang="en-IN";rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;
+  let receivedSpeech=false;
+  mic.classList.add("listening");mic.textContent="🔴";
+  output.textContent="Microphone is ready. Speak a command now…";
+  rec.onstart=()=>{output.textContent="Listening… Say a command clearly."};
+  rec.onspeechstart=()=>{output.textContent="I can hear you…"};
+  rec.onresult=e=>{
+   let finalText="";
+   for(let i=e.resultIndex;i<e.results.length;i++){
+    const text=e.results[i][0].transcript;
+    if(e.results[i].isFinal)finalText+=text;
+    else output.textContent="Hearing: "+text;
+   }
+   if(finalText.trim()){
+    receivedSpeech=true;
+    output.textContent="You said: "+finalText;
+    executeCommand(finalText);
+   }
+  };
+  rec.onnomatch=()=>{output.textContent="I heard something, but could not understand it. Try saying “turn on the fan” slowly."};
+  rec.onerror=e=>{
+   const errors={
+    "not-allowed":"Microphone access was denied. Use the site icon beside the address bar → Microphone → Allow, then reload.",
+    "service-not-allowed":"The browser's speech service is blocked. Check Edge privacy/network settings, or use the typed command box.",
+    "audio-capture":"The browser could not access an audio input. Check that a microphone is connected and enabled in Windows.",
+    "network":"Speech recognition could not reach its recognition service. Check your internet connection and try again.",
+    "no-speech":"No speech was detected. Click the microphone and speak soon after it starts listening.",
+    "language-not-supported":"This speech service does not support English (India) on this device. Try changing the browser language to English (United States), or use typed commands.",
+    "aborted":"Voice listening was stopped."
+   };
+   output.textContent=errors[e.error]||("Speech recognition error: "+e.error+". Try again or type your command.");
+   if(e.error!=="aborted")toast("Voice recognition: "+e.error);
+  };
+  rec.onend=()=>{
+   mic.classList.remove("listening");mic.textContent="🎙️";
+   if(!receivedSpeech&&output.textContent.startsWith("Listening"))output.textContent="Listening stopped without detecting speech. Check the microphone input level and try again.";
+   if(activeRecognition===rec)activeRecognition=null;
+  };
+  rec.start();
+ }catch(err){
+  mic.classList.remove("listening");mic.textContent="🎙️";
+  output.textContent="Could not start speech recognition ("+(err.name||"error")+"). Reload the page and try again.";
+  toast("Could not start the microphone");
+ }
+}
+$("typedCommand").addEventListener("keydown",e=>{if(e.key==="Enter")runTypedCommand()});
+$("tempTarget").addEventListener("input",e=>setTempTarget(e.target.value));
+$("fanSpeed").addEventListener("input",e=>{setFanSpeed(e.target.value);renderEnergy()});
+$("brightness").addEventListener("input",e=>setGlobalBrightness(e.target.value));
+$("roomTemp").addEventListener("input",e=>{ $("tempTarget").value=e.target.value;setTempTarget(e.target.value)});
+$("roomBright").addEventListener("input",e=>{$("brightness").value=e.target.value;setGlobalBrightness(e.target.value)});
+$("luxRange").addEventListener("input",e=>{state.lux=Number(e.target.value);$("luxValue").textContent=state.lux+" lux";if(state.automations.light)runLightAutomation()});
+$("sensorTemp").addEventListener("input",e=>setSensorTemp(e.target.value));
+["tariff","hours","days","extraWatt"].forEach(id=>{$(id).addEventListener("input",()=>renderEnergy(false));$(id).addEventListener("change",()=>renderEnergy(true))});
+function renderAutomationControls(){
+ const labels={light:"lightAutoStatus",temp:"tempAutoStatus",safety:"safetyAutoStatus",voice:"voiceAutoStatus"};
+ Object.keys(labels).forEach(which=>{
+  const enabled=!!state.automations[which];
+  const toggle=$("auto"+which[0].toUpperCase()+which.slice(1)+"Toggle");
+  const label=$(labels[which]);
+  if(toggle){toggle.classList.toggle("on",enabled);toggle.setAttribute("aria-checked",String(enabled));}
+  if(label)label.textContent=enabled?"Enabled":"Disabled";
+ });
+}
+function renderAll(){
+ renderDevices();renderSecurity();renderActivity();renderAlerts();renderComfort();renderEnergy();renderAutomationTrace();
+ $("tempTarget").value=state.target;$("tempValue").textContent=state.target+"°C";
+ $("fanSpeed").value=devices.fan.speed;$("fanValue").textContent=devices.fan.speed+" / 5";
+ $("brightness").value=state.brightness;$("brightnessValue").textContent=state.brightness+"%";
+ $("luxRange").value=state.lux;$("luxValue").textContent=state.lux+" lux";
+ $("sensorTemp").value=state.sensorTemp;$("sensorTempValue").textContent=state.sensorTemp+"°C";
+ renderAutomationControls();
+}
+function init(){
+ const now=new Date();$("todayLabel").textContent=now.toLocaleDateString("en-IN",{weekday:"long",month:"long",day:"numeric"}).toUpperCase()+" · YOUR HOME AT A GLANCE";
+ log("DomusOS dashboard opened","⌂");log("Home devices loaded in demo mode","✓");renderAll();
+}
+window.Domus={toggleDevice,setBrightness,setFanSpeed,
+ getSnapshot:()=>({devices,state:{security:state.security,automations:state.automations,temperature:state.temperature,target:state.target,fanSpeed:state.fanSpeed,brightness:state.brightness,lux:state.lux,sensorTemp:state.sensorTemp,doorOpen:state.doorOpen,motion:state.motion,smoke:state.smoke,alerts:state.alerts,activity:state.activity,trace:state.trace}}),
+ applySnapshot:(snapshot)=>{if(!snapshot||!snapshot.state||!snapshot.devices)return;Object.keys(devices).forEach(k=>{if(snapshot.devices[k])Object.assign(devices[k],snapshot.devices[k]);});Object.assign(state,snapshot.state);state.automations=Object.assign(state.automations,snapshot.state.automations||{});renderAll();}};
+Object.assign(window,{showPage,applyScene,toggleSecurity,startVoice,runTypedCommand,triggerSensor,clearAlerts,toggleAutomation,calculateCost,resetCalculator,clearActivity});
+init();
+})();
+</script>
+
+<script>
+(() => {
+ "use strict";
+ const $ = id => document.getElementById(id);
+ function setMessage(id,text,type="error"){const box=$(id);box.textContent=text;box.className="auth-message show "+type;}
+ function clearMessages(){["loginMessage","signupMessage"].forEach(id=>{const el=$(id);el.textContent="";el.className="auth-message";});}
+ function showSignup(){clearMessages();$("loginView").classList.add("auth-hidden");$("signupView").classList.remove("auth-hidden");$("signupName").focus();}
+ function showLogin(){clearMessages();$("signupView").classList.add("auth-hidden");$("loginView").classList.remove("auth-hidden");$("loginEmail").focus();}
+ function updateProfile(user){const name=user.name||"DomusOS User";$("profileName").textContent=name;$("profileAvatar").textContent=(name.trim()[0]||"D").toUpperCase();}
+ async function api(url, options={}){const response=await fetch(url,{credentials:"same-origin",headers:{"Content-Type":"application/json",...(options.headers||{})},...options});let data={};try{data=await response.json();}catch{} if(!response.ok)throw new Error(data.error||"The server could not complete the request.");return data;}
+ async function loadState(){try{const data=await api('/api/state');if(window.Domus&&window.Domus.applySnapshot)window.Domus.applySnapshot(data.state); }catch(e){console.warn('Could not load saved DomusOS state:',e.message);}}
+ async function enterApp(user){updateProfile(user);document.body.classList.add("authenticated");$("authScreen").setAttribute("aria-hidden","true");await loadState();}
+ function leaveApp(){document.body.classList.remove("authenticated");$("authScreen").removeAttribute("aria-hidden");showLogin();}
+ $("loginForm").addEventListener("submit",async event=>{event.preventDefault();clearMessages();const email=$("loginEmail").value.trim().toLowerCase(),password=$("loginPassword").value;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!password){setMessage("loginMessage","Enter a valid email address and your password.");return;}try{const data=await api('/api/login',{method:'POST',body:JSON.stringify({email,password,remember:$("rememberMe").checked})});$("loginForm").reset();await enterApp(data.user);}catch(e){setMessage("loginMessage",e.message);}});
+ $("signupForm").addEventListener("submit",async event=>{event.preventDefault();clearMessages();const name=$("signupName").value.trim(),email=$("signupEmail").value.trim().toLowerCase(),password=$("signupPassword").value,confirm=$("signupConfirm").value;if(name.length<2){setMessage("signupMessage","Enter a name with at least 2 characters.");return;}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setMessage("signupMessage","Enter a valid email address.");return;}if(password.length<8){setMessage("signupMessage","Use a password with at least 8 characters.");return;}if(password!==confirm){setMessage("signupMessage","The passwords do not match.");return;}if(!$("localAccountNotice").checked){setMessage("signupMessage","Please confirm the local demo account notice.");return;}try{const data=await api('/api/register',{method:'POST',body:JSON.stringify({name,email,password})});$("signupForm").reset();await enterApp(data.user);}catch(e){setMessage("signupMessage",e.message);}});
+ window.showSignup=showSignup;window.showLogin=showLogin;window.logoutDomusUser=async()=>{try{if(window.Domus&&window.Domus.getSnapshot)await window.DomusBackend.save(window.Domus.getSnapshot());await api('/api/logout',{method:'POST',body:'{}'});}catch(e){}leaveApp();};
+ window.DomusBackend={save:async snapshot=>{try{await api('/api/state',{method:'PUT',body:JSON.stringify({state:snapshot})});}catch(e){console.warn('DomusOS save failed:',e.message);}},loadState};
+ api('/api/me').then(async data=>{if(data.user)await enterApp(data.user);else leaveApp();}).catch(()=>leaveApp());
+})();
+</script>
+
+<script>
+(() => {
+ "use strict";
+ let timer=null;
+ let saveChain=Promise.resolve();
+ function isReady(){return document.body.classList.contains('authenticated')&&window.DomusBackend&&window.Domus;}
+ function saveNow(){
+  if(!isReady())return;
+  const snapshot=window.Domus.getSnapshot();
+  // Serialize writes so a slower earlier request cannot overwrite a newer state.
+  saveChain=saveChain.then(()=>window.DomusBackend.save(snapshot)).catch(error=>console.warn('DomusOS autosave queue failed:',error));
+ }
+ function queueSave(){
+  if(!isReady())return;
+  clearTimeout(timer);
+  timer=setTimeout(saveNow,250);
+ }
+ // Bubble-phase listeners run after the control's own handler has updated the state.
+ document.addEventListener('click',queueSave);
+ document.addEventListener('input',queueSave);
+ document.addEventListener('change',queueSave);
+ document.addEventListener('pointerup',queueSave);
+ document.addEventListener('keyup',queueSave);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){clearTimeout(timer);saveNow();}});
+ window.addEventListener('pagehide',()=>{if(!isReady())return;clearTimeout(timer);const snapshot=window.Domus.getSnapshot();fetch('/api/state',{method:'PUT',credentials:'same-origin',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({state:snapshot})}).catch(error=>console.warn('DomusOS final save failed:',error));});
+})();
+</script>
+</body>
+</html>
