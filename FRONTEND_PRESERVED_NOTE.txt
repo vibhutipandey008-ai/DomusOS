@@ -1,0 +1,1 @@
+The supplied DomusOS_With_Login.html visual design was used as the frontend template. The login form was changed from browser-local account storage to the Flask authentication API; dashboard styles and page structure were retained.
